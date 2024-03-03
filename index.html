@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bingo</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <dialog>
+        <h2 id="banner">Winner</h3>
+        <div id="winner-container">
+            
+        </div>
+        <div class="button-container">
+            <button data-play-again>Play again</button>
+            <button data-cancel>Cancel</button>
+        </div>
+    </dialog>
+    <main>
+        <div class="top">
+            <div class="input-container">
+                <div>
+                    <select data-player-count>
+                        <option value="" disabled selected>Select</option>
+                    </select>
+                    <button data-generate-cards>Generate Cards</button>
+                    <button data-generate-random id="play-button">Roll</button>
+                </div>
+                <div>
+                    <span id="current-draw">Current Draw Result: </span>
+                    <input type="text" name="result" data-result>
+                </div>
+                <span data-winner>Winner: 0</span>
+            </div>
+        </div>
+
+        <div class="card-container">
+        </div>
+    </main>
+    
+    <aside>
+        
+    </aside>
+    
+    <script src="app.js"></script>
+</body>
+</html>
