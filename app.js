@@ -5,8 +5,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const indicatorText = getDataFromLocalStorage('drawIndicator');
     const select = (selector) => document.querySelector(selector);
 
-    console.log(drawResults);
-
     const playerCountDrp = select('[data-player-count]');
     const generateCardBtn = select('[data-generate-cards]');
     const rollBtn = select('[data-generate-random]');
@@ -23,6 +21,7 @@ document.addEventListener('DOMContentLoaded', () => {
     initResultTable();
     restoreInitialState();
 
+    // generates blank cards bases on number of players
     generateCardBtn.addEventListener('click', () => {
         emptyLocalStorage();
         
@@ -50,7 +49,6 @@ document.addEventListener('DOMContentLoaded', () => {
             cardContainer.innerHTML = '';
         }
     });
-
 
     // generates result
     rollBtn.addEventListener('click', () => {
@@ -103,7 +101,7 @@ document.addEventListener('DOMContentLoaded', () => {
         winnerDialog.close();
     })
     
-
+    // restores previous state 
     function restoreInitialState(){
         const latestDraw = drawResults[drawResults.length - 1];
         if(bingoCardsData.length > 0){
@@ -119,16 +117,19 @@ document.addEventListener('DOMContentLoaded', () => {
 
     }
 
+    // clears local storage
     function emptyLocalStorage(){
         localStorage.clear();
     }
 
+    // marks previously drawn results
     function markPreviousResults(){
         if (drawResults.length > 0) {
             drawResults.forEach(result => markDrawResult(result, "#c4c400"));
         }
     }
 
+    // retrieves data from local storage
     function getDataFromLocalStorage(key) {
         const storedCardsData = localStorage.getItem(key);
         return storedCardsData ? JSON.parse(storedCardsData) : [];
@@ -209,6 +210,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    // renders card data to html objects
     function generateCardHTML(cardData){
         const {id, player, numbers} = cardData;
         var card = `<div class="card" id="${id}">`;
@@ -229,6 +231,7 @@ document.addEventListener('DOMContentLoaded', () => {
         return card;
     }
 
+    // saves data to local storage
     function saveToLocalStorage(key, value){
         localStorage.setItem(key, JSON.stringify(value));
     }
@@ -325,6 +328,7 @@ document.addEventListener('DOMContentLoaded', () => {
         return Math.floor(Math.random() * (max - min + 1)) + min;
     }
 
+    // marks the draw results
     function markDrawResult(className, bgcolor) {
         const selectedCells = document.getElementsByClassName(className);
         const textColor = "#FbFcF8"
@@ -334,6 +338,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    // goes to the current drawn result in the result table
     function scrollToDrawResult(drawResult) {
         [...aside.getElementsByClassName(drawResult)].forEach(element => {
             element.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'center' });
@@ -341,6 +346,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    // capitalizes letter for draw result indicator
     function capitalizeFirstLetter(string) {
         return string.charAt(0).toUpperCase() + string.slice(1);
     }
