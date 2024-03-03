@@ -34,7 +34,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const quantity = playerCountDrp.value;
 
-        if (quantity) generateCards(quantity);
+        if (quantity) generateCardData(quantity);
         else {
             alert('Select a value first');
             cardContainer.innerHTML = '';
@@ -122,45 +122,70 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // generates bingo cards
-    function generateCards(quantity) {
+    function generateCardData(quantity) {
         cardContainer.innerHTML = '';
-        var quantity = parseInt(quantity);
-        var card = '';
+        const quantityInt = parseInt(quantity);
+        const cardsData = []
         const letter = ['b', 'i', 'n', 'g', 'o']
 
-        for (let i = 0; i < quantity; i++) {
-            var cardNumbers = generateBingoNumbers();
-            card += `<div class="card" id="card${i + 1}">`;
-            card += `<h1>Player ${i + 1}</h1>`;
-            card += `<table>`;
+        for (let i = 0; i < quantityInt; i++) {
+            const cardNumbers = generateBingoNumbers();
+            const cardData = {
+                id: `card${i + 1}`,
+                player: `Player${i + 1}`,
+                numbers: []
+            }
 
-            for (let x = 0; x < 6; x++) {
-                card += '<tr>';
-
-                for (let y = 0; y < 5; y++) {
-                    if (x === 0) {
-                        card += `<td class="free">${letter[y].toUpperCase()}</td>`;
-                    } else {
-                        const isCenterCell = x === 3 && y === 2; // Center row for "Free"
-                        const cellContent = isCenterCell ? 'Free' : cardNumbers[x - 1][y];
-                        const cellClass = isCenterCell ? 'free' : `${letter[y]}${cardNumbers[x - 1][y]}`;
-
-                        card += `<td class="${cellClass}">${cellContent}</td>`;
+            for(let x = 0; x < 5; x++){
+                if(x === 0){
+                    for(let y = 0; y < 5; y++){
+                        cardData.numbers.push({content: letter[y].toUpperCase(), class: 'free'});
                     }
                 }
 
-                card += '</tr>';
+                for(let y = 0; y < 5; y++){
+                    const isCenterCell = x === 2 && y ===2;
+                    const cellContent = isCenterCell ? 'Free' : cardNumbers[x][y];
+                    const cellClass = isCenterCell ? 'free' : `${letter[y]}${cardNumbers[x][y]}`;
+
+                    cardData.numbers.push({content: cellContent, class: cellClass});
+                }
             }
 
-
-            card += '</table> </div>';
-            cardContainer.innerHTML = card;
+            cardsData.push(cardData);
         }
-
+        // saves the cards data to the localstorage
+        saveBingoCards(cardsData);
+        
+        // renders the cards data to html object
+        cardsData.forEach(cardData => {
+            const cardHTML = generateCardHTML(cardData);
+            cardContainer.innerHTML += cardHTML;
+        });
     }
 
-    function saveBingoCard(cardData){
+    function generateCardHTML(cardData){
+        const {id, player, numbers} = cardData;
+        var card = `<div class="card" id="${id}">`;
+        card += `<h1> ${player} </h1>`;
+        card += `<table>`;
+
+        for(let x = 0; x < 6; x++){
+            card += '<tr>';
+            for(let y = 0; y < 5; y++){
+                const {content, class: cellClass} = numbers[x * 5 + y];
+                card += `<td class="${cellClass}">${content}</td>`;
+            }
+            card += '</tr>';
+        }
         
+        card += '</table> </div>';
+
+        return card;
+    }
+
+    function saveBingoCards(cardsData){
+        localStorage.setItem('bingoCardsData', JSON.stringify(cardsData));
     }
     // checks each cell for winner
     function checkForWinner() {
