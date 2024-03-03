@@ -1,7 +1,11 @@
 document.addEventListener('DOMContentLoaded', () => {
     const maxNumber = 75;
-    const drawResults = [];
+    const drawResults = getDataFromLocalStorage('drawResults');
+    const bingoCardsData = getDataFromLocalStorage('bingoCardsData');
+    const indicatorText = getDataFromLocalStorage('drawIndicator');
     const select = (selector) => document.querySelector(selector);
+
+    console.log(drawResults);
 
     const playerCountDrp = select('[data-player-count]');
     const generateCardBtn = select('[data-generate-cards]');
@@ -17,9 +21,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
     initPlayerOption();
     initResultTable();
+    restoreInitialState();
 
     generateCardBtn.addEventListener('click', () => {
-        Array.from(aside.querySelectorAll('tr')).forEach(cell => Object.assign(cell.style, { backgroundColor: 'rgba(0, 0, 0, 0)', color: 'black' }));
+        emptyLocalStorage();
+        
+        Array.from(aside.querySelectorAll('tr')).forEach(cell => Object.assign
+            (cell.style, { backgroundColor: 'rgba(0, 0, 0, 0)', color: 'black' }));
+        
+        // moves the cursor back to the top of the table
         scrollToDrawResult('b1');
         rollBtn.disabled = false;
         drawResults.length = 0;
@@ -44,9 +54,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // generates result
     rollBtn.addEventListener('click', () => {
-        if (drawResults.length > 0) {
-            drawResults.forEach(result => markDrawResult(result, "#c4c400"));
-        }
+        markPreviousResults();
 
         const hasCards = cardContainer.querySelector('div');
 
@@ -63,6 +71,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 drawResults.push(drawResult);
                 resultIndicator.value = `Under ${capitalizeFirstLetter(drawResult)}`;
 
+                saveToLocalStorage('drawIndicator', resultIndicator.value);
+
                 if (drawResults.length === maxNumber) {
                     alert('Max attempt reached!');
                     rollBtn.disabled = true;
@@ -70,6 +80,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 const winningCardIds = checkForWinner();
                 if (winningCardIds) displayWinner(winningCardIds);
+
+                saveToLocalStorage('drawResults', drawResults);
             } else {
                 alert('Max attempt reached!');
                 rollBtn.disabled = true;
@@ -83,6 +95,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // reloads page
     playAgainBtn.addEventListener('click', () => {
+        emptyLocalStorage();
         location.reload();
     });
 
@@ -90,6 +103,37 @@ document.addEventListener('DOMContentLoaded', () => {
         winnerDialog.close();
     })
     
+
+    function restoreInitialState(){
+        const latestDraw = drawResults[drawResults.length - 1];
+        if(bingoCardsData.length > 0){
+            bingoCardsData.forEach(cardData => {
+                const card = generateCardHTML(cardData);
+                cardContainer.innerHTML += card;
+            })
+        }
+        markPreviousResults();
+        markDrawResult(latestDraw, '#50C878');
+        scrollToDrawResult(latestDraw);
+        resultIndicator.value = indicatorText;
+
+    }
+
+    function emptyLocalStorage(){
+        localStorage.clear();
+    }
+
+    function markPreviousResults(){
+        if (drawResults.length > 0) {
+            drawResults.forEach(result => markDrawResult(result, "#c4c400"));
+        }
+    }
+
+    function getDataFromLocalStorage(key) {
+        const storedCardsData = localStorage.getItem(key);
+        return storedCardsData ? JSON.parse(storedCardsData) : [];
+    }
+
     // initializes result log table
     function initResultTable() {
         var newTable = document.createElement('table');
@@ -154,8 +198,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
             cardsData.push(cardData);
         }
+
         // saves the cards data to the localstorage
-        saveBingoCards(cardsData);
+        saveToLocalStorage('bingoCardsData', cardsData);
         
         // renders the cards data to html object
         cardsData.forEach(cardData => {
@@ -184,9 +229,10 @@ document.addEventListener('DOMContentLoaded', () => {
         return card;
     }
 
-    function saveBingoCards(cardsData){
-        localStorage.setItem('bingoCardsData', JSON.stringify(cardsData));
+    function saveToLocalStorage(key, value){
+        localStorage.setItem(key, JSON.stringify(value));
     }
+
     // checks each cell for winner
     function checkForWinner() {
         const cards = cardContainer.querySelectorAll('.card');
@@ -295,10 +341,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-
     function capitalizeFirstLetter(string) {
         return string.charAt(0).toUpperCase() + string.slice(1);
     }
-
-
 })
