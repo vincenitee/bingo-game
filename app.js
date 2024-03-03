@@ -30,6 +30,7 @@ document.addEventListener('DOMContentLoaded', () => {
         
         // moves the cursor back to the top of the table
         scrollToDrawResult('b1');
+        resultIndicator.value = "";
         rollBtn.disabled = false;
         drawResults.length = 0;
 
